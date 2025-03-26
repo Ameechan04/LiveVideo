@@ -2,10 +2,13 @@ import java.io.*;
 import java.net.*;
 import uk.co.caprica.vlcj.factory.MediaPlayerFactory;
 import uk.co.caprica.vlcj.player.base.MediaPlayer;
+import uk.co.caprica.vlcj.player.embedded.EmbeddedMediaPlayer;
 
 public class Receiver {
 
     public static void main(String[] args) throws Exception {
+        System.setProperty("vlc.lib.path", "C:\\Program Files\\VideoLAN\\VLC"); // Replace with your VLC path
+
         DatagramSocket socket = new DatagramSocket(12345); // port number
         byte[] buffer = new byte[4096];
         File tempFile = new File("streamed.ts"); // file name for downloading
@@ -38,8 +41,24 @@ public class Receiver {
             while (!started) {
                 if (tempFile.length() >= minFileSize) {
                     try {
-                        MediaPlayerFactory factory = new MediaPlayerFactory();
-                        MediaPlayer player = factory.mediaPlayers().newMediaPlayer();
+                        // Pass VLC options as arguments to MediaPlayerFactory
+                        String[] vlcArgs = new String[] {// Disable subtitles
+                                "--no-video-title-show",
+                                "--sub-filter=none"  // Disable video title display
+                        };
+
+                        // Initialize MediaPlayerFactory with options
+                        MediaPlayerFactory mediaPlayerFactory = new MediaPlayerFactory(vlcArgs);
+
+                        // Create the EmbeddedMediaPlayer
+                        EmbeddedMediaPlayer player = mediaPlayerFactory.mediaPlayers().newEmbeddedMediaPlayer();
+                        player.marquee().enable(false);
+                        // Specify path to the video file (make sure the file exists)
+                        if (!tempFile.exists()) {
+                            throw new Exception("Video file does not exist.");
+                        }
+
+                        // Play the video
                         player.media().play(tempFile.getAbsolutePath());
                         System.out.println("\n[INFO] Video playback started.");
                         started = true;
@@ -64,3 +83,4 @@ public class Receiver {
         }
     }
 }
+

@@ -7,7 +7,7 @@ public class Main {
         InetAddress receiverAddress = InetAddress.getByName("localhost");
         int port = 12345;
 
-        FileInputStream videoFile = new FileInputStream("video.mp4"); // file input
+        FileInputStream videoFile = new FileInputStream("converted-video.ts"); // file input
         byte[] dataBuffer = new byte[4096]; // or use a multiple of 188 bytes for TS packet alignment
         int bytesRead;
 
